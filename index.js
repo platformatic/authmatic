@@ -1,21 +1,30 @@
 'use strict'
 
 class RolesActionsResources {
-  constructor() {
+  constructor({ getPrincipalResourceRoles } = {}) {
     this.rules = []
+    this.getPrincipalResourceRoles = getPrincipalResourceRoles
   }
 
   addRule(rule) {
     this.rules.push(rule)
   }
 
-  can(principal, action, resource) {
+  getPrincipalResourceRoles(principal, resource) {
+    throw new Error('getPrincipalResourceRoles not implemented')
+  }
+
+  async can(principal, action, resource) {
+    let resources = principal.resources
+    if (!resources) {
+      resources = await this.getPrincipalResourceRoles(principal, resource)
+    }
     for (let rule of this.rules) {
-      for (let principalResource of principal.resources) {
+      for (let principalResource of resources) {
         if (rule.resources.includes(principalResource.name) &&
-            rule.role === principal.role
-          && rule.actions.includes(action)
-          && principalResource.id === resource.id) {
+            rule.role === principalResource.role &&
+            rule.actions.includes(action) &&
+            principalResource.id === resource.id) {
           return true
         }
       }
