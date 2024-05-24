@@ -14,7 +14,7 @@ class RolesActionsResources {
     throw new Error('getPrincipalResourceRoles not implemented')
   }
 
-  async can(principal, action, resource) {
+  async can({ principal, action, resource }) {
     let resources = principal.resources
     if (!resources) {
       resources = await this.getPrincipalResourceRoles(principal, resource)
@@ -24,6 +24,7 @@ class RolesActionsResources {
         if (rule.resources.includes(principalResource.name) &&
             rule.role === principalResource.role &&
             rule.actions.includes(action) &&
+            principalResource.name === resource.name &&
             principalResource.id === resource.id) {
           return true
         }
